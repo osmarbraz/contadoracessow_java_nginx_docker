@@ -42,12 +42,13 @@ public class Contador extends HttpServlet {
             // Fecha a conexão com o Redis
             redis.close();
 
+            // Recupera o nome do servidor
             String servidor = System.getenv("HOSTNAME");
             
             // Página HTML
             out.println("<html><head><title>Contador</title></head><body>");
             out.println("<h1>Contador</h1>");       
-            out.println("<p>Servidor: " + servidor + "</p><p>");            
+            out.println("<p>Servidor: " + servidor + "</p>");
             out.println("<p>Valor: " + valor + "</p><p>");
             out.println("<a href='/servlet/Contador?acao=incrementar'>Incrementar</a>");
             out.println("</p>");
