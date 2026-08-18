@@ -1,0 +1,186 @@
+# Define os serviços (containers) que fazem parte da aplicação.
+services:
+
+  # ============================================================
+  # SERVIÇO DO BANCO DE DADOS EM MEMÓRIA REDIS
+  # ============================================================
+
+  # Nome do serviço Redis.
+  # Esse nome também será utilizado como hostname pelos outros
+  # containers da mesma rede Docker.
+  redis:
+
+    # Imagem Docker utilizada para criar o container.
+    # Neste caso, utiliza o Redis na versão 7.0.
+    image: redis:7-alpine
+
+    # Define o nome do container.
+    # O container poderá ser identificado pelo nome "redis".
+    container_name: redis
+
+    # Define o comportamento do container caso ele seja encerrado.
+    # "unless-stopped" reinicia automaticamente o container,
+    # exceto quando ele tiver sido parado manualmente.
+    restart: unless-stopped
+
+    # Mapeamento das portas entre o computador e o container.
+    ports:
+
+      # Porta 6379 do computador -> porta 6379 do container.
+      #
+      # A porta 6379 é a porta padrão utilizada pelo protocolo
+      # Redis.
+      - "6379:6379"
+
+    # Define as redes às quais o container estará conectado.
+    networks:
+
+      # Conecta o Redis à rede "rede_cliente".
+      #
+      # Outros containers conectados à mesma rede poderão
+      # acessar o Redis utilizando o hostname "redis".
+      - rede_cliente
+
+  # ============================================================
+  # SERVIÇO DA APLICAÇÃO JAVA
+  # ============================================================
+
+  # Nome do serviço que executará a aplicação Java.
+  app:
+
+    # Imagem Docker utilizada para executar a aplicação.
+    image: contadoracessow_java_nginx_docker
+        
+    # Define as configurações necessárias para construir a imagem
+    # Docker da aplicação.
+    build:
+
+      # Define a pasta que será utilizada como contexto durante
+      # a construção da imagem.
+      #
+      # O ponto "." representa a pasta atual, onde está localizado
+      # o arquivo compose.yml.
+      #
+      # Arquivos existentes dentro dessa pasta poderão ser
+      # utilizados pelo Dockerfile durante o processo de construção.
+      context: .
+
+      # Define o nome do arquivo Dockerfile que será utilizado
+      # para construir a imagem da aplicação.
+      #
+      # Neste caso, será utilizado o arquivo "Dockerfile",
+      # localizado na pasta definida pelo "context".
+      dockerfile: Dockerfile
+
+    # Reinicia automaticamente o container caso ele seja
+    # encerrado inesperadamente.
+    restart: unless-stopped
+
+    # Mapeamento das portas entre o computador e o container.
+    ports:
+
+      # Porta 8080 do computador -> porta 8080 do Tomcat.
+      #
+      # Assim, a aplicação poderá ser acessada através de:
+      # http://localhost:8080
+      - "8080"
+
+    # Define dependências entre os serviços.
+    depends_on:
+
+      # Determina que o container Redis deve ser iniciado
+      # antes do container da aplicação.
+      #
+      # IMPORTANTE:
+      # Isso não garante que o Redis esteja totalmente pronto
+      # para aceitar conexões. Apenas estabelece a ordem de
+      # inicialização dos containers.
+      - redis
+
+    # Conecta a aplicação à mesma rede utilizada pelo Redis.
+    #
+    # Isso permite que a aplicação encontre o banco de dados
+    # utilizando o hostname "redis".
+    networks:
+      - rede_cliente
+      
+  # ============================================================
+  # SERVIÇO DO NGINX
+  # ============================================================
+
+  # Nome do serviço que executará o servidor Nginx.
+  nginx:
+
+    # Imagem Docker utilizada para executar o Nginx.
+    #
+    # Neste caso, utiliza o Nginx na versão 1.30 baseada
+    # na distribuição Alpine Linux.
+    image: nginx:1.30-alpine
+
+    # Mapeamento das portas entre o computador e o container.
+    ports:
+
+      # Porta 80 do computador -> porta 80 do Nginx.
+      #
+      # O Nginx receberá as requisições HTTP na porta 80
+      # dentro do container.
+      #
+      # Como a porta 80 do computador está associada à
+      # porta 80 do Nginx, a aplicação poderá ser acessada
+      # através de:
+      # http://localhost:80
+      - "80:80"
+
+    # Define os volumes utilizados pelo container.
+    volumes:
+
+      # Monta o arquivo nginx.conf do computador dentro
+      # do container.
+      #
+      # Arquivo de origem:
+      # ./nginx.conf
+      #
+      # Localização dentro do container:
+      # /etc/nginx/nginx.conf
+      #
+      # A opção ":ro" significa "read-only" (somente leitura).
+      # Dessa forma, o Nginx poderá ler o arquivo de configuração,
+      # mas não poderá alterá-lo dentro do container.
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+    # Define dependências entre os serviços.
+    depends_on:
+
+      # Determina que o container da aplicação Java deve ser
+      # iniciado antes do container do Nginx.
+      #
+      # IMPORTANTE:
+      # Isso não garante que a aplicação Java esteja totalmente
+      # pronta para receber requisições. Apenas estabelece a
+      # ordem de inicialização dos containers.
+      - app
+
+    # Conecta o Nginx à mesma rede utilizada pelos demais
+    # serviços da aplicação.
+    #
+    # Isso permite que o Nginx se comunique com o container
+    # da aplicação Java utilizando o nome do serviço "app".
+    networks:
+      - rede_cliente
+      
+# ==============================================================
+# REDES
+# ==============================================================
+
+# Declara as redes utilizadas pelos serviços.
+networks:
+
+  # Nome da rede Docker que será utilizada pela aplicação,
+  # e pelo banco de dados em memória Redis.
+  rede_cliente:
+
+    # Define o tipo de driver utilizado pela rede.
+    #
+    # O driver "bridge" cria uma rede virtual que permite
+    # a comunicação entre os containers conectados a ela.
+    driver: bridge
