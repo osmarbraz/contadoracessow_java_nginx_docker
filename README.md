@@ -1,6 +1,6 @@
 # Contador de acesso em Java WEB com Docker Compose e Redis e Nginx
 
-Aplicação **Contador de Acesso WEB** desenvolvida em **Java** e executada em um cluster em container Docker.
+Aplicação **Contador de Acesso WEB**, desenvolvida em **Java** e executada em um ambiente clusterizado com múltiplas instâncias da aplicação em containers **Docker**, utilizando o **Nginx** como balanceador de carga.
 
 ## Sobre o projeto
 
