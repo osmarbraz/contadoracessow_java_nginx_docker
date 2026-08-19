@@ -19,15 +19,22 @@ Aplicação **Contador de Acesso WEB**, desenvolvida em **Java** e executada em 
  - Utilizer o terminal do Powershel em modo administrador.
 
 ### Para criar os conteiners e os serviços
- - docker compose up -d --build --scale app=3
+ - ```docker compose up -d --build --scale app=3```
 
 ### Parar os serviços
- - docker compose down -v
+ - ```docker compose down -v```
 
 ### Abra o navegador em:
  - http://localhost:80/
 
 ### Remover as imagens
- - docker compose down --rmi all
+ - ```docker compose down --rmi all```
+
+## Arquitetura do Sistema
+
+![Arquitetura](arquitetura.png)
+
+## Docker Hub
+ - https://hub.docker.com/r/osmarbraz/contadoracessow_java_nginx_docker
 
 
