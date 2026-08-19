@@ -16,7 +16,7 @@ Aplicação **Contador de Acesso WEB**, desenvolvida em **Java** e executada em 
 - Utiliza o **Nginx 1.3 ** como balanceador de carga da aplicação. 
 
 ## Docker
- - Utilizer o terminal do Powershel em modo administrador.
+ - Utilizar o terminal do Windows Powershel em modo administrador.
 
 ### Para criar os conteiners e os serviços
  - ```docker compose up -d --build --scale app=3```
